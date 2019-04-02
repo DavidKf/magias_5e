@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:dnd_spells/model/data.dart';
-import 'package:dnd_spells/model/image_class.dart';
-import 'package:dnd_spells/study/spell.dart';
-import 'package:dnd_spells/study/spell_list.dart';
+import 'package:dnd_spells/model/class.dart';
+import 'package:dnd_spells/model/spell.dart';
+
+import 'package:dnd_spells/layout/spell_list.dart';
+
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,17 +41,26 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
   // Keep track of current page to avoid unnecessary renders
   int currentPage = 0;
 
+  bool _buildingSpellList = false;
+
   List<Spell> spellList = new List<Spell>();
 
-  //get the assets
+  //get the spell assets
   Future<String> loadAssets() async {
     return await rootBundle.loadString('assets/magias.json');
+  }
+
+  buildSpellList() {
+    setState(() {
+      _buildingSpellList = true;
+    });
+    _getSpells();
   }
 
   @override
   void initState() {
     super.initState();
-    _getSpells();
+    buildSpellList();
     // Set state when page changes
     ctrl.addListener(
       () {
@@ -70,18 +81,23 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
   Widget build(BuildContext context) {
     return StreamBuilder(
       builder: (context, AsyncSnapshot snap) {
-        List<SpellClass> slideList = listaClasses;
+        List<Class> slideList = classList;
 
         return Scaffold(
-          body: PageView.builder(
-            controller: ctrl,
-            itemCount: slideList.length,
-            itemBuilder: (context, int currentIdx) {
-              // Active page
-              bool active = currentIdx == currentPage;
-              return _buildStoryPage(slideList.elementAt(currentIdx), active);
-            },
+          body: ModalProgressHUD(
+            opacity: 1.0,
+            inAsyncCall: _buildingSpellList,
+            child: PageView.builder(
+              controller: ctrl,
+              itemCount: slideList.length,
+              itemBuilder: (context, int currentIdx) {
+                // Active page
+                bool active = currentIdx == currentPage;
+                return _buildStoryPage(slideList.elementAt(currentIdx), active);
+              },
+            ),
           ),
+          // TODO: add class-specific functionality
           // floatingActionButton: FloatingActionButton(
           //   onPressed: () {},
           //   child: const Icon(Icons.add),
@@ -92,7 +108,7 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
   }
 
   // Builder Functions
-  _buildStoryPage(SpellClass classe, bool active) {
+  _buildStoryPage(Class classe, bool active) {
     // Animated Properties
     final double blur = active ? 30 : 5;
     final double offset = active ? 20 : 2;
@@ -102,6 +118,7 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
     var spells =
         this.spellList.where((s) => s.classes.contains(classe.name)).toList();
 
+    // adds a colored gradient shade over the image
     var imageOverlayGradient = DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -116,6 +133,7 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
       ),
     );
 
+    // create and animate the spell cards
     return AnimatedContainer(
       duration: Duration(milliseconds: 500),
       curve: Curves.easeOutQuint,
@@ -149,9 +167,7 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
           Padding(
             padding: const EdgeInsets.only(bottom: 30),
             child: Center(
-              child: new ClassIcon(
-                icon: classe.icon,
-              ),
+              child: getClassIcon(classe.icon),
             ),
           ),
           SizedBox.expand(
@@ -179,6 +195,7 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
     );
   }
 
+  // async call to build the json file into a real list of spells
   Future<List<Spell>> _getSpells() async {
     var data =
         await DefaultAssetBundle.of(context).loadString('assets/magias.json');
@@ -206,6 +223,11 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
     }
 
     spellList = spells;
+
+    setState(() {
+      _buildingSpellList = false;
+    });
+
     return spells;
   }
 }
