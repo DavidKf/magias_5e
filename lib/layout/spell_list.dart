@@ -1,3 +1,4 @@
+import 'package:dnd_spells/layout/spell_card.dart';
 import 'package:dnd_spells/model/class.dart';
 import 'package:dnd_spells/model/spell.dart';
 
@@ -13,10 +14,9 @@ class SpellList extends StatelessWidget {
   Widget build(BuildContext context) {
     return new MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Magias 5e',
       theme: ThemeData(
-        brightness: Brightness.dark,
-      ),
+          brightness: Brightness.dark, accentColor: classeData.accentColor),
       home: SpellListLayout(
         classe: classeData,
         spells: spellsData,
@@ -48,7 +48,7 @@ class _SpellListLayoutState extends State<SpellListLayout> {
 
   Icon actionIcon = new Icon(Icons.search);
 
-  var contentration = Image.asset(
+  var contentrationIcon = Image.asset(
     'assets/dndicon/concentration.png',
     semanticLabel: 'Concentration',
     height: 20.0,
@@ -64,7 +64,6 @@ class _SpellListLayoutState extends State<SpellListLayout> {
     color: Colors.white,
   );
 
-  var iconMargin = EdgeInsetsDirectional.only(start: 5.0);
   var height = 200.0;
 
   @override
@@ -164,8 +163,8 @@ class _SpellListLayoutState extends State<SpellListLayout> {
 
     widget.spells.forEach(
       (spell) {
-        if (spell.name.toLowerCase().contains(text) ||
-            spell.level.toLowerCase().contains(text))
+        if (spell.nome.toLowerCase().contains(text) ||
+            spell.nivel.toLowerCase().contains(text))
           searchSpellList.add(spell);
       },
     );
@@ -173,113 +172,44 @@ class _SpellListLayoutState extends State<SpellListLayout> {
     setState(() {});
   }
 
+  //   SliverPersistentHeader makeHeader(String headerText) {
+  //   return SliverPersistentHeader(
+  //     pinned: true,
+  //     delegate: _SliverAppBarDelegate(
+  //       minHeight: 60.0,
+  //       maxHeight: 200.0,
+  //       child: Container(
+  //           color: Colors.lightBlue, child: Center(child:
+  //               Text(headerText))),
+  //     ),
+  //   );
+  // }
+
   // builds the spell lists
   SliverList spellList() {
     return SliverList(
       delegate: searchSpellList.length != 0 || controller.text.isNotEmpty
           ? SliverChildBuilderDelegate(
               // If user is searching, use the filtered list
-              (context, index) => Card(
-                    elevation: 2.0,
-                    child: Container(
-                      child: spellTile(index, searchSpellList),
-                    ),
+              (context, index) => new SpellCard(
+                    spells: searchSpellList,
+                    index: index,
+                    contentrationIcon: contentrationIcon,
+                    ritualIcon: ritualIcon,
                   ),
               childCount: searchSpellList.length,
             )
           : SliverChildBuilderDelegate(
               // else, use the original list
-              (context, index) {
-                return Card(
-                  elevation: 2.0,
-                  child: Container(
-                    child: spellTile(index, widget.spells),
+              (context, index) => new SpellCard(
+                    spells: widget.spells,
+                    index: index,
+                    contentrationIcon: contentrationIcon,
+                    ritualIcon: ritualIcon,
+                    classeData: widget.classe,
                   ),
-                );
-              },
               childCount: widget.spells.length,
             ),
-    );
-  }
-
-  // individual tiles for the spells
-  ExpansionTile spellTile(int index, List<Spell> lista) {
-    var isConcentracao = lista[index].concentration;
-    var isRitual = lista[index].ritual;
-    var spell = lista[index];
-
-    const marginTop = const EdgeInsets.only(top: 12.0);
-
-    bool notNull(Object o) => o != null;
-
-    return ExpansionTile(
-      trailing: Text(
-        spell.level,
-      ),
-      title: Row(
-        children: <Widget>[
-          Text(
-            spell.name,
-            style: TextStyle(
-              fontSize: 16.0,
-              letterSpacing: 0.5,
-            ),
-          ),
-          (isConcentracao) // Adds the concentration icon
-              ? Container(
-                  child: contentration,
-                  margin: iconMargin,
-                )
-              : null,
-          (isRitual) // Adds the ritual icon
-              ? Container(
-                  child: ritualIcon,
-                  margin: EdgeInsetsDirectional.only(start: 5.0),
-                )
-              : null,
-        ].where(notNull).toList(),
-      ),
-      children: <Widget>[
-        // Spell data to show, when the tile is expanded
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: <Widget>[
-              expandedTileItem(const EdgeInsets.all(0.0),
-                  'Tempo de Conjuração: ', spell.conjurationTime),
-              expandedTileItem(marginTop, 'Alcance/Área: ', spell.reach),
-              expandedTileItem(marginTop, 'Componentes: ', spell.components),
-              expandedTileItem(marginTop, 'Duração: ', spell.duration),
-              expandedTileItem(marginTop, '', spell.description),
-              (spell.superiorLevel != null)
-                  ? expandedTileItem(marginTop, '', spell.superiorLevel)
-                  : null,
-            ].where(notNull).toList(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Format the different texts for when the tiles are expanded
-  Container expandedTileItem(EdgeInsets margin, String label, String text) {
-    return Container(
-      margin: margin,
-      alignment: Alignment.centerLeft,
-      child: new RichText(
-        text: TextSpan(
-          children: <TextSpan>[
-            TextSpan(
-              text: '$label',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17.0),
-            ),
-            TextSpan(
-              text: '$text',
-              style: TextStyle(fontSize: 16.0),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

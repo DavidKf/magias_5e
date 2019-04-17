@@ -1,15 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
-
-import 'package:dnd_spells/model/class.dart';
-import 'package:dnd_spells/model/spell.dart';
 
 import 'package:dnd_spells/layout/spell_list.dart';
-
-import 'package:modal_progress_hud/modal_progress_hud.dart';
-
+import 'package:dnd_spells/model/class.dart';
+import 'package:dnd_spells/model/db.dart';
+import 'package:dnd_spells/model/spell.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 void main() => runApp(MyApp());
 
@@ -41,14 +38,9 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
   // Keep track of current page to avoid unnecessary renders
   int currentPage = 0;
 
-  bool _buildingSpellList = false;
+  bool _buildingSpellList = true;
 
-  List<Spell> spellList = new List<Spell>();
-
-  //get the spell assets
-  Future<String> loadAssets() async {
-    return await rootBundle.loadString('assets/magias.json');
-  }
+  String magiasJson = 'assets/magias.json';
 
   buildSpellList() {
     setState(() {
@@ -82,9 +74,12 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
     return StreamBuilder(
       builder: (context, AsyncSnapshot snap) {
         List<Class> slideList = classList;
-
         return Scaffold(
           body: ModalProgressHUD(
+            color: Colors.black,
+            progressIndicator: new CircularProgressIndicator(
+              backgroundColor: Colors.red,
+            ),
             opacity: 1.0,
             inAsyncCall: _buildingSpellList,
             child: PageView.builder(
@@ -99,6 +94,8 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
           ),
           // TODO: add class-specific functionality
           // floatingActionButton: FloatingActionButton(
+          //   backgroundColor: classList[currentPage].accentColor,
+          //   elevation: 4.0,
           //   onPressed: () {},
           //   child: const Icon(Icons.add),
           // ),
@@ -114,9 +111,6 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
     final double offset = active ? 20 : 2;
     final double top = active ? 50 : 100;
     final double sides = active ? 0 : 30;
-
-    var spells =
-        this.spellList.where((s) => s.classes.contains(classe.name)).toList();
 
     // adds a colored gradient shade over the image
     var imageOverlayGradient = DecoratedBox(
@@ -172,7 +166,9 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
           ),
           SizedBox.expand(
             child: FlatButton(
-              onPressed: () {
+              onPressed: () async {
+                List<Spell> spells = await getClassSpells(classe, true);
+
                 if (active) {
                   Navigator.push(
                     context,
@@ -195,39 +191,42 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
     );
   }
 
+  Future<List<Spell>> getClassSpells(Class classe, bool somenteFavorito) async {
+    var list = somenteFavorito
+        ? await DBProvider.db.getSpellByFavoritoAndClasse(1, classe.name)
+        : await DBProvider.db.getSpellByClasse(classe.name);
+
+    List<Spell> spells = new List<Spell>();
+
+    if (list != Null) spells = spellsFromJson(list);
+
+    // spells.sort((a, b) => b.favorito.compareTo(a.favorito));
+    return spells;
+  }
+
   // async call to build the json file into a real list of spells
-  Future<List<Spell>> _getSpells() async {
-    var data =
-        await DefaultAssetBundle.of(context).loadString('assets/magias.json');
+  _getSpells() async {
+    dynamic list = await DBProvider.db.selectAll();
+    // print('List select all: ${list.toString()}');
 
-    var jsonData = json.decode(data);
+    List<Spell> spells = new List<Spell>();
 
-    List<Spell> spells = [];
+    if (list != Null) spells = spellsFromJson(list);
 
-    for (var i in jsonData) {
-      Spell spell = Spell(
-          i["nivel"],
-          i["nome"],
-          i["duracao"],
-          i["concentracao"],
-          i["escola"],
-          i["ritual"],
-          i["classes"],
-          i["tempoConjuracao"],
-          i["alcance"],
-          i["componentes"],
-          i["desc"],
-          i["nivelSuperior"]);
+    // print('Spells select all: ${spells.toString()}');
 
-      spells.add(spell);
+    if (spells.length == 0) {
+      var data = await rootBundle.loadString(magiasJson);
+
+      spells = spellsFromJson(data);
+
+      await DBProvider.db.newSpellList(spells);
+
+      // print('List first time: ${spells.toString()}');
     }
-
-    spellList = spells;
 
     setState(() {
       _buildingSpellList = false;
     });
-
-    return spells;
   }
 }
