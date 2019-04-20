@@ -167,7 +167,7 @@ class SpellClassSlideShowState extends State<SpellClassSlideShow> {
           SizedBox.expand(
             child: FlatButton(
               onPressed: () async {
-                List<Spell> spells = await getClassSpells(classe, true);
+                List<Spell> spells = await getClassSpells(classe, false);
 
                 if (active) {
                   Navigator.push(

@@ -48,19 +48,19 @@ class _SpellCardState extends State<SpellCard> {
       size: 16.0,
     );
     return InkWell(
-      // onLongPress: () async {
-      //   var a = await fav(spell);
+      onLongPress: () async {
+        var a = await fav(spell);
 
-      //   setState(() {
-      //     spell.favorito = a;
-      //   });
+        setState(() {
+          spell.favorito = a;
+        });
 
-      //   // final snackBar = SnackBar(
-      //   //   duration: Duration(milliseconds: 500),
-      //   //   content: Text(checkFavorito(spell.favorito).toString()),
-      //   // );
-      //   // Scaffold.of(context).showSnackBar(snackBar);
-      // },
+        // final snackBar = SnackBar(
+        //   duration: Duration(milliseconds: 500),
+        //   content: Text(checkFavorito(spell.favorito).toString()),
+        // );
+        // Scaffold.of(context).showSnackBar(snackBar);
+      },
       child: Card(
         shape: checkFavorito(spell.favorito)
             ? new RoundedRectangleBorder(

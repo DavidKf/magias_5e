@@ -170,7 +170,7 @@
 	},
 	{
 		"id": 12,
-		"favorito": 1,
+		"favorito": 0,
 		"nome": "Ilusão Menor",
 		"nivel": "Truque",
 		"duracao": "1 minutos",
@@ -200,7 +200,7 @@
 	},
 	{
 		"id": 14,
-		"favorito": 1,
+		"favorito": 0,
 		"nome": "Mãos Mágicas",
 		"nivel": "Truque",
 		"duracao": "1 minutos",
@@ -275,7 +275,7 @@
 	},
 	{
 		"id": 19,
-		"favorito": 1,
+		"favorito": 0,
 		"nome": "Raio De Fogo",
 		"nivel": "Truque",
 		"duracao": "Instantâneo",
@@ -353,7 +353,7 @@
 	},
 	{
 		"id": 24,
-		"favorito": 1,
+		"favorito": 0,
 		"nome": "Taumaturgia",
 		"nivel": "Truque",
 		"duracao": "1 minutos",
@@ -368,7 +368,7 @@
 	},
 	{
 		"id": 25,
-		"favorito": 1,
+		"favorito": 0,
 		"nome": "Toque Arrepiante",
 		"nivel": "Truque",
 		"duracao": "1 rodadas",
@@ -462,7 +462,7 @@
 	},
 	{
 		"id": 31,
-		"favorito": 1,
+		"favorito": 0,
 		"nome": "Armadura Arcana",
 		"nivel": "1º nível",
 		"duracao": "8 horas",
@@ -1049,7 +1049,7 @@
 	},
 	{
 		"id": 69,
-		"favorito": 1,
+		"favorito": 0,
 		"nome": "Onda Trovejante",
 		"nivel": "1º nível",
 		"duracao": "Instantâneo",
@@ -1174,7 +1174,7 @@
 	},
 	{
 		"id": 77,
-		"favorito": 1,
+		"favorito": 0,
 		"nome": "Raio Adoecente",
 		"nivel": "1º nível",
 		"duracao": "Instantâneo",
